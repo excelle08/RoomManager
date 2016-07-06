@@ -8,6 +8,7 @@ namespace RoomManager.Model
         IEnumerable<T> SelectAll(string condition);
         T SelectOne(string condition);
         IEnumerable<T> Select(string condition, int offset = 0, int limit = 0);
+        int Count(string condition);
         int Update(T item);
         int Delete(T item);
     }

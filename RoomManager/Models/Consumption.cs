@@ -13,6 +13,8 @@ namespace RoomManager.Model
 		public int Count { get; set; }
 		[ColumnAttribute("price")]
 		public float Price { get; set; }
+		[ColumnAttribute("paid")]
+		public bool Paid { get; set; }
 		[ColumnAttribute("comment")]
 		public string Comment { get; set; }
 	}

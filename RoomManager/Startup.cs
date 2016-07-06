@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using RoomManager.Model;
 
 namespace RoomManager
 {
@@ -29,6 +31,10 @@ namespace RoomManager
         {
             // Add framework services.
             services.AddMvc();
+            services.AddDistributedMemoryCache();
+            services.AddSession(options => {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -36,6 +42,15 @@ namespace RoomManager
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+
+            app.UseSession();
+            app.UseCookieAuthentication(new CookieAuthenticationOptions() {
+                AuthenticationScheme = "RMCookieMiddlewareInstance",
+                LoginPath = new PathString("/api/User/Login"),
+                AccessDeniedPath = new PathString("/api/User/Disallowed"),
+                AutomaticAuthenticate = true,
+                AutomaticChallenge = true
+            });
 
             app.UseMvc();
         }

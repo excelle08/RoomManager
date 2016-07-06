@@ -3,6 +3,7 @@ using System.Reflection;
 using Dapper;
 using SqlConnection = MySql.Data.MySqlClient.MySqlConnection;
 using SqlCommand = MySql.Data.MySqlClient.MySqlCommand;
+using System.Diagnostics;
 using System;
 
 namespace RoomManager.Model
@@ -45,15 +46,23 @@ namespace RoomManager.Model
 
         public IEnumerable<T> SelectAll(string condition) {
             string sql = String.Format("SELECT * FROM {0};", tablename);
+            IEnumerable<T> result;
             connector.Open();
-            IEnumerable<T> result = connector.Query<T>(sql);
-            connector.Close();
+            try {
+                result = connector.Query<T>(sql);
+            } catch (InvalidOperationException e) {
+                Debug.Write(e.Message);
+                return new List<T>();
+            } finally {
+                connector.Close();
+            }
 
             return result;
         }
 
         public IEnumerable<T> Select(string condition, int offset = 0, int limit = 0) {
             string sql = "SELECT * FROM " + tablename;
+            IEnumerable<T> result;
             if (condition.Length > 0) {
                 sql += " WHERE " + condition;
             }
@@ -65,28 +74,55 @@ namespace RoomManager.Model
             }
 
             connector.Open();
-            IEnumerable<T> result = connector.Query<T>(sql);
-            connector.Close();
+            try {
+                result = connector.Query<T>(sql);
+            } catch (InvalidOperationException e ) {
+                Debug.Write(e.Message);
+                return new List<T>();
+            } finally {
+                connector.Close();
+            }
 
             return result;
         }
 
         public T SelectOne(string condition) {
             string sql = "SELECT * FROM " + tablename;
+            T result;
             if (condition.Length > 0) {
                 sql += " WHERE " + condition;
             }
 
             connector.Open();
-            T result = connector.QueryFirst<T>(sql);
-            connector.Close();
+            try {
+                result = connector.QueryFirst<T>(sql);
+            } catch ( InvalidOperationException e ) {
+                Debug.Write(e.Message);
+                return default(T);
+            } finally {
+                connector.Close();
+            }
 
             return result;
         }
 
+        public int Count(string condition = "") {
+            string sql = "SELECT count(*) FROM " + tablename;
+            if (condition != "") {
+                sql += " WHERE " + condition;
+            }
+            int count;
+
+            connector.Open();
+            count = connector.QueryFirst<int>(sql);
+
+            return count;
+        }
+
         public int Update(T item) {
-            string pk = GetPrimaryKey();
-            var pkvalue = item.GetType().GetProperty(pk).GetValue(item);
+            string[] pkArr = GetPrimaryKey();
+            string pk = pkArr[0], pkProp = pkArr[1];
+            var pkvalue = item.GetType().GetProperty(pkProp).GetValue(item);
             if (pkvalue == null) {
                 throw new NullKeyException("Cannot update an item whose key is empty: " + typeof(T).FullName);
             }
@@ -107,8 +143,9 @@ namespace RoomManager.Model
         }
 
         public int Delete(T item) {
-            string pk = GetPrimaryKey();
-            var pkvalue = item.GetType().GetProperty(pk).GetValue(item);
+            string[] pkArr = GetPrimaryKey();
+            string pk = pkArr[0], pkProp = pkArr[1];
+            var pkvalue = item.GetType().GetProperty(pkProp).GetValue(item);
             if (pkvalue == null) {
                 throw new NullKeyException("Cannot delete an item whose key is empty: " + typeof(T).FullName);
             }
@@ -121,29 +158,35 @@ namespace RoomManager.Model
             return retn;
         }
         
-        private string GetPrimaryKey() {
-            string pk = "";
+        private string[] GetPrimaryKey() {
+            string pk = "", pkProp = "";
 
-            MemberInfo info = typeof(T).GetTypeInfo();
-            IEnumerable<ColumnAttribute> attrs = info.GetCustomAttributes<ColumnAttribute>();
-            foreach(ColumnAttribute attr in attrs) {
-                if (attr is ColumnAttribute && (attr.Constraint & ColumnConstraint.PrimaryKey) > 0) {
+            Type t = typeof(T);
+            foreach (PropertyInfo prop in t.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                ColumnAttribute attr = prop.GetCustomAttribute<ColumnAttribute>();
+                if ((attr.Constraint & ColumnConstraint.PrimaryKey) > 0) {
                     pk = attr.Name;
+                    pkProp = prop.Name;
                 }
             }
+
             if (pk == "") {
                 throw new PrimaryKeyNotDefinedException("Primary key is not defined in type: " + typeof(T).FullName);
             } else {
-                return pk;
+                return new string[] {pk, pkProp};
             }
         }
 
         private string[] GetColumnNames(bool IgnorePK = false, bool IgnoreAutoIncrement = false) {
             List<string> names = new List<string>();
-            MemberInfo info = typeof(T).GetTypeInfo();
-            IEnumerable<ColumnAttribute> attrInfos = info.GetCustomAttributes<ColumnAttribute>();
 
-            foreach (ColumnAttribute attr in attrInfos) {
+            foreach (PropertyInfo prop in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)) {
+                ColumnAttribute attr = prop.GetCustomAttribute<ColumnAttribute>();
+
+                if(attr == null) {
+                    continue;
+                }
                 if(IgnorePK) {
                     if ((attr.Constraint & ColumnConstraint.PrimaryKey) > 0) {
                         continue;
@@ -162,34 +205,33 @@ namespace RoomManager.Model
 
         private string[] GetValues(T item, bool IgnorePK = false, bool IgnoreAutoIncrement = false) {
             List<string> values = new List<string>();
-            FieldInfo[] propInfos = typeof(T).GetFields();
 
-            foreach (FieldInfo field in propInfos) {
+            foreach (PropertyInfo prop in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)) {
                 if(IgnorePK || IgnoreAutoIncrement) {
-                    ColumnAttribute fieldattr = field.GetCustomAttribute<ColumnAttribute>();
+                    ColumnAttribute fieldattr = prop.GetCustomAttribute<ColumnAttribute>();
                     if (fieldattr == null || IgnorePK && (fieldattr.Constraint & ColumnConstraint.PrimaryKey) > 0
                         || IgnoreAutoIncrement && (fieldattr.Constraint & ColumnConstraint.AutoIncrement) > 0) {
                         continue;
                     }
                 }
                 
-                string fvalue = item.GetType().GetProperty(field.Name).GetValue(item).ToString();
-                if (field.GetType().Equals(typeof(string))) {
+                var fvalue = item.GetType().GetProperty(prop.Name).GetValue(item);
+                if (fvalue is string) {
                     values.Add(String.Format("\"{0}\"", fvalue));
+                } else if (fvalue is Enum) {
+                    values.Add(((int) fvalue).ToString());
                 } else {
-                    values.Add(fvalue);
+                    values.Add(fvalue.ToString());
                 }
             }
             return values.ToArray();
         }
 
         private void SetLastInsertId(ref T item, int value) {
-            FieldInfo[] propInfos = typeof(T).GetFields();
-
-            foreach (FieldInfo field in propInfos) {
-                ColumnAttribute fieldattr = field.GetCustomAttribute<ColumnAttribute>();
+            foreach (PropertyInfo prop in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)) {
+                ColumnAttribute fieldattr = prop.GetCustomAttribute<ColumnAttribute>();
                 if ( fieldattr != null && (fieldattr.Constraint & ColumnConstraint.AutoIncrement) > 0) {
-                    item.GetType().GetProperty(field.Name).SetValue(item, value);
+                    item.GetType().GetProperty(prop.Name).SetValue(item, value);
                 }
             }
         }
