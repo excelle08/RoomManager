@@ -52,7 +52,7 @@ namespace RoomManager.Model
                 result = connector.Query<T>(sql);
             } catch (InvalidOperationException e) {
                 Debug.Write(e.Message);
-                return new List<T>();
+                result = new List<T>();
             } finally {
                 connector.Close();
             }
@@ -66,11 +66,8 @@ namespace RoomManager.Model
             if (condition.Length > 0) {
                 sql += " WHERE " + condition;
             }
-            if (offset > 0) {
-                sql += " OFFSET " + offset.ToString();
-            }
             if (limit > 0) {
-                sql += " LIMIT " + limit.ToString();
+                sql += String.Format(" LIMIT {0},{1} ", offset, limit);
             }
 
             connector.Open();
@@ -78,7 +75,7 @@ namespace RoomManager.Model
                 result = connector.Query<T>(sql);
             } catch (InvalidOperationException e ) {
                 Debug.Write(e.Message);
-                return new List<T>();
+                result = new List<T>();
             } finally {
                 connector.Close();
             }
@@ -98,7 +95,7 @@ namespace RoomManager.Model
                 result = connector.QueryFirst<T>(sql);
             } catch ( InvalidOperationException e ) {
                 Debug.Write(e.Message);
-                return default(T);
+                result = default(T);
             } finally {
                 connector.Close();
             }
@@ -115,6 +112,7 @@ namespace RoomManager.Model
 
             connector.Open();
             count = connector.QueryFirst<int>(sql);
+            connector.Close();
 
             return count;
         }
@@ -220,6 +218,8 @@ namespace RoomManager.Model
                     values.Add(String.Format("\"{0}\"", fvalue));
                 } else if (fvalue is Enum) {
                     values.Add(((int) fvalue).ToString());
+                } else if (fvalue == null ) {
+                    values.Add("null");
                 } else {
                     values.Add(fvalue.ToString());
                 }

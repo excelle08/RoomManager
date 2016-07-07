@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 using RoomManager.Model;
+using SqlConnection = MySql.Data.MySqlClient.MySqlConnection;
 
 
 namespace RoomManager.Controllers
@@ -14,6 +15,8 @@ namespace RoomManager.Controllers
     [Route("api/[controller]")]
     public class UserController : Controller
     {
+        static SqlConnection conn = DBConnector.GetConnection();
+        static DataHelper<User> DHUser = new DataHelper<User>(ref conn);
         // GET /api/user (Get current user)
         [HttpGet]
         public IActionResult Get()
@@ -31,8 +34,6 @@ namespace RoomManager.Controllers
         [HttpGetAttribute("all")]
         public IActionResult GetAll() {
             if (UserHelper.IsAdmin(HttpContext)) {
-                var conn = DBConnector.GetConnection();
-                DataHelper<User> DHUser = new DataHelper<User>(ref conn);
 
                 var results = DHUser.SelectAll("");
                 return new ObjectResult(results);
@@ -45,8 +46,6 @@ namespace RoomManager.Controllers
         public IActionResult Get(int id)
         {
             if (UserHelper.IsAdmin(HttpContext)) {
-                var conn = DBConnector.GetConnection();
-                DataHelper<User> DHUser = new DataHelper<User>(ref conn);
 
                 var result = DHUser.SelectOne(String.Format("id = {0}", id));
                 if (result == null) {
@@ -83,8 +82,6 @@ namespace RoomManager.Controllers
                     return new ObjectResult(new {error = "user", message = "Username or password is empty"});
                 }
 
-                var conn = DBConnector.GetConnection();
-                DataHelper<User> DHUser = new DataHelper<User>(ref conn);
                 User existingUser = DHUser.SelectOne(String.Format("username = '{0}'", user.UserName));
                 
                 if (existingUser != null) {
@@ -103,8 +100,6 @@ namespace RoomManager.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id) {
             if (UserHelper.IsAdmin(HttpContext)) {
-                var conn = DBConnector.GetConnection();
-                DataHelper<User> DHUser = new DataHelper<User>(ref conn);
 
                 User user = DHUser.SelectOne(String.Format("id = {0}", id));
                 if (user == null) {
@@ -136,8 +131,6 @@ namespace RoomManager.Controllers
         [HttpPatchAttribute("{id}/password")]
         public IActionResult UpdatePassword(int id, [FromBody] string password) {
             if (UserHelper.IsAdmin(HttpContext)) {
-                var conn = DBConnector.GetConnection();
-                DataHelper<User> DHUser = new DataHelper<User>(ref conn);
 
                 password = password.Trim();
                 if (password.Length == 0) {

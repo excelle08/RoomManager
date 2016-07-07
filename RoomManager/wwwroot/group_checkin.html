@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>团体预订</title>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="http://apps.bdimg.com/libs/vue/1.0.14/vue.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/trumbowyg.min.css">
+    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="/js/request.js"></script>
+    <script src="/js/trumbowyg.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/groupbook.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid" id="header-nav">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">客房管理软件</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row" >
+        <div class="col-sm-2 col-md-2">
+
+        </div>
+        <div class="col-sm-10 col-md-10 main" id="checkout-form">
+            <div class="alert alert-danger hidden" role="alert" id="product-category-warning"> </div>
+            <form class="form-horizontal" id="login-form">
+
+                <div class="form-group">
+                    <table class="table">
+                        <caption>成员列表(第一个登记的将记为领队)</caption>
+                        <thead>
+                        <tr>
+                            <th>#ID</th>
+                            <th>项目</th>
+                            <th>数量</th>
+                            <th>价格</th>
+                            <th>备注</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="c in consumptions">
+                            <td v-text="c.id"></td>
+                            <td v-text="c.itemname"></td>
+                            <td v-text="c.count"></td>
+                            <td v-text="c.price"></td>
+                            <td v-text="c.comment"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-md-offset-1 col-sm-6">
+                        <button type="button" class="btn btn-primary" v-on:click="submit">确认</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

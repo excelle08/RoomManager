@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>管理页面</title>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="http://apps.bdimg.com/libs/vue/1.0.14/vue.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/trumbowyg.min.css">
+    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="/js/request.js"></script>
+    <script src="/js/trumbowyg.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/admin.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid" id="header-nav">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">客房管理软件</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/">回到首页</a></li>
+                <li><a v-on:click="logout()">退出登录</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li role="presentation" class="active"><a href="#room" aria-controls="room" role="tab" data-toggle="tab">客房管理</a></li>
+                <li role="presentation"><a href="#item" aria-controls="item" role="tab" data-toggle="tab">商品管理</a></li>
+                <li role="presentation"><a href="#user" aria-controls="user" role="tab" data-toggle="tab">用户管理</a></li>
+            </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <div class="row placeholders tab-content">
+                <div role="tabpanel" class="tab-pane active" id="room">
+                    <div class="row">
+                        <div class="col-sm-2 col-md-2"></div>
+                        <div class="col-sm-8 col-md-8">
+                            <div class="panel-group" id="room-panel" role="tablist" aria-multiselectable="true">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading" role="tab" id="room-category-manage-window">
+                                        <h4><a role="button" class="collapsed" data-toggle="collapse" data-parent="#room-panel" href="#room-category-set-body" aria-expanded="true" aria-controls="room-category-set-body">客房列表</a></h4>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default panel-collapse collapse" id="room-category-set-body" role="tabpanel" aria-labelledby="room-category-manage-window">
+                                    <div class="panel-body" id="room-list">
+                                        <nav class="navbar navbar-default">
+                                            <div class="container-fluid">
+                                                <div class="navbar-collapse collapse">
+                                                    <form class="navbar-form navbar-left" role="search">
+                                                        <div class="form-group">
+                                                            <input type="text" v-model="category_name" class="form-control" placeholder="分类名称">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <input type="text" v-model="category_price" class="form-control" placeholder="价格">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <button type="button" class="btn btn-primary" v-on:click="addRoomType()"><span class="glyphicon glyphicon-plus"></span> 添加分类</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </nav>
+                                        <table class="table">
+                                            <caption>房间分类</caption>
+                                            <thead>
+                                                <tr>
+                                                    <th>#ID</th>
+                                                    <th>名称</th>
+                                                    <th>典型价格</th>
+                                                    <th>...</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="type in types">
+                                                    <td v-text="type.id"></td>
+                                                    <td v-text="type.name"></td>
+                                                    <td v-text="type.typical_Price"></td>
+                                                    <td>
+                                                        <a role="button" v-on:click="showEditType(type)"><span class="glyphicon glyphicon-pencil"></span> 编辑</a>
+                                                        <a role="button" v-on:click="deleteType(type)"><span class="glyphicon glyphicon-remove"></span> 删除</a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <br />
+                                        <nav class="navbar navbar-default">
+                                            <div class="container-fluid">
+                                                <div class="navbar-collapse collapse">
+                                                    <form class="navbar-form navbar-left" role="search">
+                                                        <div class="form-group">
+                                                            <input type="text" v-model="room_name" class="form-control" placeholder="房间名称">
+                                                            <input type="text" v-model="room_num" class="form-control" placeholder="房间编号">
+                                                            <input type="text" v-model="room_type" class="form-control" placeholder="分类id">
+                                                            <input type="text" v-model="room_price" class="form-control" placeholder="指定价格">
+                                                            <input type="text" v-model="room_capacity" class="form-control" placeholder="房间容量">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <button type="button" class="btn btn-primary" v-on:click="addRoom()"><span class="glyphicon glyphicon-plus"></span> 添加房间</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </nav>
+                                        <table class="table">
+                                            <caption>房间列表</caption>
+                                            <thead>
+                                                <tr>
+                                                    <th>#ID</th>
+                                                    <th>名称</th>
+                                                    <th>编号</th>
+                                                    <th>分类ID</th>
+                                                    <th>指定价格</th>
+                                                    <th>房间容量</th>
+                                                    <th>状态</th>
+                                                    <th>...</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="r in rooms">
+                                                    <td v-text="r.id"></td>
+                                                    <td v-text="r.name"></td>
+                                                    <td v-text="r.number"></td>
+                                                    <td v-text="r.type"></td>
+                                                    <td v-text="r.custom_Price"></td>
+                                                    <td v-text="r.capacity"></td>
+                                                    <td v-text="getStatus(r.status)"></td>
+                                                    <td>
+                                                        <a role="button" v-on:click="showEditRoom(r)"><span class="glyphicon glyphicon-pencil"></span> 编辑</a>
+                                                        <a role="button" v-on:click="deleteRoom(r)"><span class="glyphicon glyphicon-remove"></span> 删除</a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <nav>
+                                            <ul class="pagination">
+                                                <li>
+                                                    <a href="#" aria-label="Previous" v-on:click="previous">
+                                                        <span aria-hidden="true">&laquo;</span>
+                                                    </a>
+                                                </li>
+                                                <li><a href="#">{{page}}</a></li>
+                                                <li>
+                                                    <a href="#" aria-label="Next" v-on:click="next">
+                                                        <span aria-hidden="true">&raquo;</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-2 col-md-2"></div>
+
+                        <div class="modal fade" id="roomtype-edit">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span> </button>
+                                        <h4 class="modal-title">分类编辑</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="container-fluid">
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <form class="form-horizontal">
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3">分类ID</label>
+                                                            <div class="col-sm-8">
+                                                                <input class="form-control col-sm-9" readonly v-bind:value="n_type_id">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3">房间名称</label>
+                                                            <div class="col-sm-8">
+                                                                <input class="form-control col-sm-9"  v-model="n_type_name">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3">房间类型</label>
+                                                            <div class="col-sm-8">
+                                                                <input class="form-control col-sm-9" v-model="n_type_price">
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                        <button type="button" class="btn btn-primary" v-on:click="edittype()">确定</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="room-edit">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span> </button>
+                                        <h4 class="modal-title">分类编辑</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="container-fluid">
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <form class="form-horizontal">
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3">客房ID</label>
+                                                            <div class="col-sm-8">
+                                                                <input class="form-control col-sm-9" readonly v-bind:value="n_room_id">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3">房间名称</label>
+                                                            <div class="col-sm-8">
+                                                                <input class="form-control col-sm-9"  v-model="n_room_name">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3">房间编号</label>
+                                                            <div class="col-sm-8">
+                                                                <input class="form-control col-sm-9"  v-model="n_room_num">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3">房间类型ID</label>
+                                                            <div class="col-sm-8">
+                                                                <input class="form-control col-sm-9" v-model="n_room_type">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3">指定价格</label>
+                                                            <div class="col-sm-8">
+                                                                <input class="form-control col-sm-9"  v-model="n_room_price">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3">容量</label>
+                                                            <div class="col-sm-8">
+                                                                <input class="form-control col-sm-9"  v-model="n_room_capacity">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3">状态ID</label>
+                                                            <div class="col-sm-8">
+                                                                <input type="text" class="form-control col-sm-9"  v-model="n_room_status">
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                        <button type="button" class="btn btn-primary" v-on:click="editroom()">确定</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="item">
+                    <div class="row">
+                        <div class="col-sm-8 col-sm-offset-2 col-md-10 col-md-offset-1">
+                            <div class="panel-group" id="item-panel" role="tablist" aria-multiselectable="true">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading" role="tab" id="item-category-manage-window">
+                                        <h4><a role="button" class="collapsed" data-toggle="collapse" data-parent="#item-panel" href="#item-category-set-body" aria-expanded="true" aria-controls="item-category-set-body">商品列表</a></h4>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default panel-collapse collapse" id="item-category-set-body" role="tabpanel" aria-labelledby="item-category-manage-window">
+                                    <div class="panel-body">
+                                        <nav class="navbar navbar-default">
+                                            <div class="container-fluid">
+                                                <div class="navbar-header">
+
+                                                </div>
+                                            </div>
+                                            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2">
+                                                <form class="navbar-form navbar-left" role="search">
+                                                    <div class="form-group">
+                                                        <input class="form-control" v-model="n_item_name" type="text" placeholder="商品名称">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input class="form-control" v-model="n_item_price" type="text" placeholder="价格">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input class="form-control" v-model="n_item_desc" type="text" placeholder="描述...">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <button type="button" class="btn btn-primary" v-on:click="appendItem()">
+                                                            <span class="glyphicon glyphicon-plus"></span> 添加商品
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </nav>
+                                        <table class="table table-striped table-hover text-left">
+                                            <thead>
+                                            <tr>
+                                                <th>#ID</th>
+                                                <th>商品名称</th>
+                                                <th>价格</th>
+                                                <th>描述</th>
+                                                <th>...</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr v-for="c in items">
+                                                <td scope="row" v-text="c.id"></td>
+                                                <td v-text="c.name"></td>
+                                                <td v-text="c.typical_Price"></td>
+                                                <td v-text="c.description"></td>
+                                                <td>
+                                                    <a role="button" v-on:click="showEditItem(c)"><span class="glyphicon glyphicon-pencil"></span> 编辑商品</a>
+                                                    <a role="button" v-on:click="deleteItem(c)"><span class="glyphicon glyphicon-remove"></span> 删除商品</a>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                        <nav>
+                                            <ul class="pagination">
+                                                <li>
+                                                    <a href="#" aria-label="Previous" v-on:click="previous">
+                                                        <span aria-hidden="true">&laquo;</span>
+                                                    </a>
+                                                </li>
+                                                <li><a href="#">{{page}}</a></li>
+                                                <li>
+                                                    <a href="#" aria-label="Next" v-on:click="next">
+                                                        <span aria-hidden="true">&raquo;</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </nav>
+
+                                        <div class="modal fade" id="item-edit">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span> </button>
+                                                        <h4 class="modal-title">商品</h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="container-fluid">
+                                                            <div class="row">
+                                                                <div class="col-sm-12">
+                                                                    <form class="form-horizontal">
+                                                                        <div class="form-group">
+                                                                            <label class="col-sm-3">商品ID</label>
+                                                                            <div class="col-sm-8">
+                                                                                <input class="form-control col-sm-9" readonly v-bind:value="item_id">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label class="col-sm-3">商品名称</label>
+                                                                            <div class="col-sm-8">
+                                                                                <input class="form-control col-sm-9"  v-model="item_name">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label class="col-sm-3">商品价格</label>
+                                                                            <div class="col-sm-8">
+                                                                                <input class="form-control col-sm-9" v-model="item_price">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label class="col-sm-3">商品描述</label>
+                                                                            <div class="col-sm-8">
+                                                                                <input class="form-control col-sm-9" v-model="item_desc">
+                                                                            </div>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                                        <button type="button" class="btn btn-primary" v-on:click="editItem()">确定</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="user">
+                    <div role="tabpanel" class="tab-pane" id="users">
+                        <div class="row">
+                            <div class="col-sm-8 col-sm-offset-2 col-md-10 col-md-offset-1">
+                                <div class="user" id="user-panel" role="tablist" aria-multiselectable="true">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading" role="tab" id="user-category-manage-window">
+                                            <h4><a role="button" class="collapsed" data-toggle="collapse" data-parent="#user-panel" href="#user-category-set-body" aria-expanded="true" aria-controls="user-category-set-body">用户列表</a></h4>
+                                        </div>
+                                    </div>
+                                    <div class="panel panel-default panel-collapse collapse" id="user-category-set-body" role="tabpanel" aria-labelledby="user-category-manage-window">
+                                        <div class="panel-body">
+                                            <nav class="navbar navbar-left">
+                                                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-3">
+                                                    <form class="navbar-form navbar-left" role="search">
+                                                        <div class="form-group">
+                                                            <input type="text" class="form-control" v-model="n_username" placeholder="用户名">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <input type="text" class="form-control" v-model="n_password" placeholder="密码">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <select class="form-control" v-model="n_privilege">
+                                                                <option value="0">封禁用户</option>
+                                                                <option value="1">普通员工</option>
+                                                                <option value="2">管理员</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <button type="button" class="btn btn-primary" v-on:click="createUser()">
+                                                                <span class="glyphicon glyphicon-plus"></span> 创建用户
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </nav>
+
+                                            <table class="table table-striped table-hover text-left">
+                                                <thead>
+                                                <tr>
+                                                    <th>#ID</th>
+                                                    <th>用户名</th>
+                                                    <th>密码Hash</th>
+                                                    <th>...</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr v-for="u in users">
+                                                    <td scope="row" v-text="u.id"></td>
+                                                    <td v-text="u.userName"></td>
+                                                    <td v-text="u.password"></td>
+                                                    <td>
+                                                        <a v-on:click="showEditUserPasswd(u)">
+                                                            <span class="glyphicon glyphicon-pencil"></span> 重置密码
+                                                        </a>
+                                                        <a v-on:click="showEditPrivilege(u)">
+                                                            <span class="glyphicon glyphicon-user"></span> 修改权限
+                                                        </a>
+                                                        <a v-on:click="removeUser(u)">
+                                                            <span class="glyphicon glyphicon-remove"></span> 删除用户
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="user-resetpwd">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span> </button>
+                                        <h4 class="modal-title">修改密码</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="container-fluid">
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <form class="form-horizontal">
+                                                        <div class="form-group">
+                                                            <input type="password" v-model="password" placeholder="新密码...">
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary" v-on:click="resetpwd" >修改</button>
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

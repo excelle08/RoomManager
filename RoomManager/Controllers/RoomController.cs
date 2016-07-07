@@ -14,13 +14,54 @@ namespace RoomManager.Controllers
         static DataHelper<Room> dhRoom = new DataHelper<Room>(ref conn);
         static DataHelper<Customer> dhCustomer = new DataHelper<Customer>(ref conn);
         [HttpGetAttribute]
-        public IActionResult ListRooms(int page = 0, int limit = 0) {
+        public IActionResult ListRooms(int page = 0, int limit = 0, string keyword = "", string specific = "") {
+            keyword = keyword ?? "";
+            specific = specific ?? "";
             int offset = 0;
             if (page > 0 && limit > 0) {
                 offset = limit * (page - 1);
             }
 
-            return new ObjectResult(dhRoom.Select("", offset, limit));
+            string condition = "";
+            if (keyword.Trim() != "") {
+                condition += String.Format("name LIKE '%{0}%' ", keyword);
+            }
+            string statusRestrict = "";
+            if (specific == "vacant") {
+                statusRestrict = "status = 0";
+            } else if (specific == "reserved") {
+                statusRestrict = "status = 1";
+            } else if (specific == "checkedin") {
+                statusRestrict = "status = 2";
+            } else if (specific == "inmaintenance") {
+                statusRestrict = "status = 3";
+            } else {
+                statusRestrict = "";
+            }
+
+            if (keyword.Trim() != "" && specific.Trim() != "") {
+                condition += "AND " + statusRestrict;
+            }
+            if (keyword.Trim() == "" && specific.Trim() != "") {
+                condition += statusRestrict;
+            }
+
+            return new ObjectResult(dhRoom.Select(condition, offset, limit));
+        }
+
+        [HttpGetAttribute("counts")]
+        public IActionResult GetStat() {
+            int vacantCount = dhRoom.Count("status = 0");
+            int reservedCount = dhRoom.Count("status = 1");
+            int checkedinCount = dhRoom.Count("status = 2");
+            int maintainedCount = dhRoom.Count("status = 3");
+
+            return new ObjectResult(new {
+                vacant = vacantCount,
+                reserved = reservedCount,
+                checkedin = checkedinCount,
+                in_Maintenance = maintainedCount
+            });
         }
 
         [HttpGetAttribute("{id}")]
@@ -58,10 +99,11 @@ namespace RoomManager.Controllers
             }
 
             currentRoom.Status = RoomStatus.Reserved;
+            dhRoom.Update(currentRoom);
             
             List<Customer> res = new List<Customer>();
             foreach (Customer c in customers) {
-                c.ReserveDate = DateTime.Now.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+                c.Reserve_Date = DateTime.Now.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
                 res.Add(dhCustomer.Insert(c));
             }
 
@@ -76,20 +118,20 @@ namespace RoomManager.Controllers
             }
 
             Customer registeredCustomer = dhCustomer.SelectOne(
-                String.Format("id = {0} AND identity = {1} AND name = {2} AND room_id = {3} AND status = 0", 
-                    customer.Id, customer.Identity, customer.Name, customer.RoomId));
+                String.Format("id = {0} AND identity = '{1}' AND name = '{2}' AND room_id = {3} AND status = 0", 
+                    customer.Id, customer.Identity, customer.Name, customer.Room_Id));
             
             if (registeredCustomer == null) {
                 if (currentRoom.Status != RoomStatus.Vacant) {
                     return new ObjectResult(new {error = "CustomerCheckin",
                         message = "Room is not vacant, and customer not reserved."});
                 }
-                customer.ReserveDate = Common.CurrentTimestamp();
+                customer.Reserve_Date = Common.CurrentTimestamp();
                 registeredCustomer = dhCustomer.Insert(customer);
             }
 
             registeredCustomer.Status = CustomerStatus.CheckedIn;
-            registeredCustomer.EntryDate = Common.CurrentTimestamp();
+            registeredCustomer.Entry_Date = Common.CurrentTimestamp();
             currentRoom.Status = RoomStatus.CheckedIn;
             dhRoom.Update(currentRoom);
             dhCustomer.Update(registeredCustomer);
@@ -105,27 +147,27 @@ namespace RoomManager.Controllers
             }
             
             Customer registeredCustomer = dhCustomer.SelectOne(
-                String.Format("id = {0} AND identity = {1} AND name = {2} AND room_id = {3} AND status = 1", 
-                    customer.Id, customer.Identity, customer.Name, customer.RoomId));
+                String.Format("id = {0} AND identity = '{1}' AND name = '{2}' AND room_id = {3} AND status = 1", 
+                    customer.Id, customer.Identity, customer.Name, customer.Room_Id));
 
             if(registeredCustomer == null) {
                 return NotFound(new {error = "CustomerCheckout", 
                     message = String.Format("The customer {0} does not exist or not in CheckedIn mode", customer.Name)});
             }
 
-            registeredCustomer.CheckoutDate = Common.CurrentTimestamp();
-            float days = (float)Math.Ceiling((registeredCustomer.CheckoutDate - registeredCustomer.EntryDate) / 86400);
+            registeredCustomer.Checkout_Date = Common.CurrentTimestamp();
+            float days = (float)Math.Ceiling((registeredCustomer.Checkout_Date - registeredCustomer.Entry_Date) / 86400);
             float price;
-            if (currentRoom.CustomPrice - 1e-3 < 0) {
+            if (currentRoom.Custom_Price - 1e-3 < 0) {
                 DataHelper<RoomType> dhRt = new DataHelper<RoomType>(ref conn);
                 RoomType rt = dhRt.SelectOne(String.Format("id = {0}", currentRoom.Type));
                 if (rt == null) {
                     return NotFound(new {error = "CustomerCheckout", 
                         message = "Invalid room type."});
                 }
-                price = rt.TypicalPrice;
+                price = rt.Typical_Price;
             } else {
-                price = currentRoom.CustomPrice;
+                price = currentRoom.Custom_Price;
             }
 
             Consumption cons = new Consumption();

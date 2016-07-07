@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>房间预订</title>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="http://apps.bdimg.com/libs/vue/1.0.14/vue.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/trumbowyg.min.css">
+    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="/js/request.js"></script>
+    <script src="/js/trumbowyg.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/reservation.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid" id="header-nav">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">客房管理软件</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row" >
+        <div class="col-sm-2 col-md-2">
+
+        </div>
+        <div class="col-sm-10 col-md-10 main" id="reserve-form">
+            <div class="alert alert-danger hidden" role="alert" id="product-category-warning"> </div>
+            <form class="form-horizontal" id="login-form">
+                <div class="form-group">
+                    <label class="col-sm-2 col-md-1">房间名称:</label>
+                    <div class="col-sm-6">
+                        <input class="form-control" type="text" v-model="room.name" readonly>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-md-1">类型:</label>
+                    <div class="col-sm-6">
+                        <input class="form-control" type="text" v-model="room.typename" readonly>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-md-1">价格:</label>
+                    <div class="col-sm-6">
+                        <input class="form-control" type="text" v-model="room.price" readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-6 col-sm-offset-2 col-md-offset-1">
+                        <nav class="navbar navbar-default">
+                            <div class="container-fluid">
+                                <div class="navbar-collapse collapse">
+                                    <form class="navbar-form navbar-left" role="search" v-if="customers.length < room.capacity">
+                                        <div class="form-group">
+                                            <button type="button" class="btn btn-primary" v-on:click="appendCustomer()" style="padding: 5px;">
+                                                <span class="glyphicon glyphicon-plus"></span> 添加客户
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </nav>
+
+                        <table class="table">
+                            <caption>客户信息</caption>
+                            <thead>
+                            <tr>
+                                <th>姓名</th>
+                                <th>身份证号码</th>
+                                <th>性别</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="c in customers">
+                                <td v-text="c.name"></td>
+                                <td v-text="c.identity"></td>
+                                <td v-text="getGender(c.gender)"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-md-offset-1 col-sm-6">
+                        <button type="button" class="btn btn-primary" v-on:click="submit">提交预订</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="modal fade" id="add-customer">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span> </button>
+                            <h4 class="modal-title">添加客户</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <form class="form-horizontal">
+                                            <div class="form-group">
+                                                <label class="col-sm-3">姓名</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control col-sm-9" v-model="name">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3">身份证号码</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control col-sm-9" v-model="identity">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3">性别</label>
+                                                <div class="col-sm-8">
+                                                    <input type="radio" class="form-control" value="1"> 男
+                                                    <input type="radio" class="form-control" value="0"> 女
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button type="button" class="btn btn-primary" v-on:click="append()">添加</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

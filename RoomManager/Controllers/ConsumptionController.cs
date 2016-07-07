@@ -14,7 +14,21 @@ namespace RoomManager.Controllers
 
         [HttpGetAttribute("{customerId}")]
         public IActionResult GetUnpaidOrders(string customerId) {
-            return new ObjectResult(dhCons.Select(String.Format("customer = {0} AND paid = false", customerId)));
+            List<Object> lst = new List<Object>();
+            DataHelper<Item> dhItem = new DataHelper<Item>(ref conn);
+            IEnumerable<Consumption> cs = dhCons.Select(String.Format("customer = {0} AND paid = false", customerId));
+            foreach(Consumption c in cs) {
+                Item item = dhItem.SelectOne(String.Format("id = {0}", c.Item));
+                lst.Add(new {
+                    id = c.Id,
+                    item = c.Item,
+                    itemname = item == null ? c.Comment : item.Name,
+                    price = c.Price,
+                    count = c.Count,
+                    comment = c.Comment
+                });
+            }
+            return new ObjectResult(lst);
         }
 
         [HttpPutAttribute]
@@ -25,7 +39,7 @@ namespace RoomManager.Controllers
             if (item == null) {
                 return NotFound(new {error = "Order", message = "Requested item does not exist."});
             }
-            consumption.Price = item.TypicalPrice * consumption.Count;
+            consumption.Price = item.Typical_Price * consumption.Count;
             
             return new ObjectResult(dhCons.Insert(consumption));
         }

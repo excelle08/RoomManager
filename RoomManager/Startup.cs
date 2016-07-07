@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.StaticFiles;
 using RoomManager.Model;
 
 namespace RoomManager
@@ -51,6 +52,8 @@ namespace RoomManager
                 AutomaticAuthenticate = true,
                 AutomaticChallenge = true
             });
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
 
             app.UseMvc();
         }

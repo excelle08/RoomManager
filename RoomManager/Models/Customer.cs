@@ -20,14 +20,14 @@ namespace RoomManager.Model
 		[ColumnAttribute("identity")]
 		public string Identity { get; set; }
 		[ColumnAttribute("reserve_date")]
-		public double ReserveDate { get; set; }
+		public double Reserve_Date { get; set; }
 		[ColumnAttribute("entry_date")]
-		public double EntryDate { get; set; }
+		public double Entry_Date { get; set; }
 		[ColumnAttribute("checkout_date")]
-		public double CheckoutDate { get; set; }
+		public double Checkout_Date { get; set; }
 		[ColumnAttribute("status")]
 		public CustomerStatus Status { get; set; }
 		[ColumnAttribute("room_id")]
-		public int RoomId { get; set; }
+		public int Room_Id { get; set; }
 	}
 }

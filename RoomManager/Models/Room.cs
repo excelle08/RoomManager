@@ -20,7 +20,7 @@ namespace RoomManager.Model
         [ColumnAttribute("type")]
         public int Type { get; set; }
         [ColumnAttribute("custom_price")]
-        public float CustomPrice { get; set; }
+        public float Custom_Price { get; set; }
         [ColumnAttribute("capacity")]
         public int Capacity { get; set; }
         [ColumnAttribute("status")]

@@ -22,11 +22,12 @@ namespace RoomManager.Controllers
             return new ObjectResult(dhRt.SelectOne(String.Format("id = {0}", id)));
         }
 
-        [HttpPostAttribute]
-        public IActionResult UpdateRoomType([FromBodyAttribute] RoomType roomtype) {
+        [HttpPostAttribute("{id}")]
+        public IActionResult UpdateRoomType(int id, [FromBodyAttribute] RoomType roomtype) {
             if (!UserHelper.IsAdmin(HttpContext)) {
                 return Forbid();
             }
+            roomtype.Id = id;
             return new ObjectResult(new {result = dhRt.Update(roomtype)});
         }
 

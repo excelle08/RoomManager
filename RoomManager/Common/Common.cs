@@ -11,7 +11,7 @@ namespace RoomManager
             return epoch;
         }
 
-        public static double CurrentTimestamp() {
+        public static double  CurrentTimestamp() {
             return DateTime.Now.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
         }
     }

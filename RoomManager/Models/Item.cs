@@ -8,7 +8,7 @@ namespace RoomManager.Model
 		[ColumnAttribute("name")]
 		public string Name { get; set; }
 		[ColumnAttribute("typical_price")]
-		public float TypicalPrice { get; set; }
+		public float Typical_Price { get; set; }
 		[ColumnAttribute("description")]
 		public string Description { get; set; }
 	}

@@ -12,8 +12,12 @@ namespace RoomManager.Controllers
         static DataHelper<Item> dhItem = new DataHelper<Item>(ref conn);
 
         [HttpGetAttribute]
-        public IActionResult Search(string keyword) {
-            return new ObjectResult(dhItem.Select(String.Format("name LIKE '%{0}%'", keyword)));
+        public IActionResult Search(string keyword = "", int page = 0, int limit = 0) {
+            int offset = 0;
+            if (page != 0 && limit != 0) {
+                offset = (page - 1) * limit;
+            }
+            return new ObjectResult(dhItem.Select(String.Format("name LIKE '%{0}%'", keyword), offset, limit));
         }
 
         [HttpGetAttribute("{id}")]

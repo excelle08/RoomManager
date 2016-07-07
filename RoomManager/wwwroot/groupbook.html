@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>团体预订</title>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="http://apps.bdimg.com/libs/vue/1.0.14/vue.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/trumbowyg.min.css">
+    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="/js/request.js"></script>
+    <script src="/js/trumbowyg.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/groupbook.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid" id="header-nav">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">客房管理软件</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row" >
+        <div class="col-sm-2 col-md-2">
+
+        </div>
+        <div class="col-sm-10 col-md-10 main" id="groupbook">
+            <div class="alert alert-danger hidden" role="alert" id="product-category-warning"> </div>
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+
+                    </div>
+                </div>
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-4">
+                    <form class="navbar-form navbar-left" role="search">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-primary" v-on:click="showAdd()">
+                                <span class="glyphicon glyphicon-plus"></span> 添加成员
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </nav>
+            <form class="form-horizontal" id="login-form">
+                <div class="form-group">
+                    <table class="table">
+                        <caption>成员列表(第一个登记的将记为领队)</caption>
+                        <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>身份证</th>
+                            <th>性别</th>
+                            <th>房间号</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="c in members">
+                            <td v-text="c.name"></td>
+                            <td v-text="c.identity"></td>
+                            <td v-text="getGender(c.gender)"></td>
+                            <td v-text="c.room_Id"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-md-offset-1 col-sm-6">
+                        <button type="button" class="btn btn-primary" v-on:click="submit">确认</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="modal fade" id="add-member">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span> </button>
+                            <h4 class="modal-title">添加成员</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <nav class="navbar navbar-default">
+                                            <div class="container-fluid">
+                                                <div class="navbar-header">
+                                                </div>
+                                            </div>
+                                            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-6">
+                                                <form class="navbar-form navbar-left" role="search">
+                                                    <div class="form-group">
+                                                        <select v-model="selected_room_index" class="form-control">
+                                                            <option v-for="k in available_rooms" v-bind:value="$index" v-text="k.name"></option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label v-text="'容量: ' + available_rooms[selected_room_index].capacity"></label>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </nav>
+
+                                        <nav class="navbar navbar-default">
+                                            <div class="container-fluid">
+                                                <div class="navbar-header">
+                                                </div>
+                                            </div>
+                                            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-5">
+                                                <form class="navbar-form navbar-left" role="search">
+                                                    <div class="form-group">
+                                                        <input class="form-control" type="text" v-model="name" placeholder="姓名">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input class="form-control" type="text" v-model="identity" placeholder="身份证号码">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <input class="form-control" type="radio" name="gender" v-model="gender" value="1"> 男
+                                                        <input class="form-control" type="radio" name="gender" v-model="gender" value="0"> 女
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <a role="button" href="#" v-on:click="pushmember()"><span class="glyphicon glyphicon-plus"></span> Add</a>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </nav>
+
+                                        <table class="table">
+                                            <thead>
+                                            <tr>
+                                                <th>姓名</th>
+                                                <th>身份证</th>
+                                                <th>性别</th>
+                                                <th>房间号</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr v-for="m in currentMem">
+                                                <td v-text="m.name"></td>
+                                                <td v-text="m.identity"></td>
+                                                <td v-text="getGender(m.gender)"></td>
+                                                <td v-text="getRmNum(m.room_Id)"></td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" v-on:click="participate()">加入</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
