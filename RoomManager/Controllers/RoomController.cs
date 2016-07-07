@@ -11,8 +11,8 @@ namespace RoomManager.Controllers
     public class RoomController : Controller
     {
         static SqlConnection conn = DBConnector.GetConnection();
-        static DataHelper<Room> dhRoom = new DataHelper<Room>(ref conn);
-        static DataHelper<Customer> dhCustomer = new DataHelper<Customer>(ref conn);
+        static DataHelper<Room> dhRoom = new DataHelper<Room>(conn);
+        static DataHelper<Customer> dhCustomer = new DataHelper<Customer>(conn);
         [HttpGetAttribute]
         public IActionResult ListRooms(int page = 0, int limit = 0, string keyword = "", string specific = "") {
             keyword = keyword ?? "";
@@ -159,7 +159,7 @@ namespace RoomManager.Controllers
             float days = (float)Math.Ceiling((registeredCustomer.Checkout_Date - registeredCustomer.Entry_Date) / 86400);
             float price;
             if (currentRoom.Custom_Price - 1e-3 < 0) {
-                DataHelper<RoomType> dhRt = new DataHelper<RoomType>(ref conn);
+                DataHelper<RoomType> dhRt = new DataHelper<RoomType>(conn);
                 RoomType rt = dhRt.SelectOne(String.Format("id = {0}", currentRoom.Type));
                 if (rt == null) {
                     return NotFound(new {error = "CustomerCheckout", 
@@ -177,7 +177,7 @@ namespace RoomManager.Controllers
             cons.Count = 1;
             cons.Price = price * days;
             cons.Paid = false;
-            DataHelper<Consumption> dhCons = new DataHelper<Consumption>(ref conn);
+            DataHelper<Consumption> dhCons = new DataHelper<Consumption>(conn);
             cons = dhCons.Insert(cons);
 
             customer.Status = CustomerStatus.CheckedOut;

@@ -12,7 +12,7 @@ namespace RoomManager.Model
     public class UserHelper
     {
         public static SqlConnection conn = db.GetConnection();
-        public static DataHelper<User> DHUser = new DataHelper<User>(ref conn);
+        public static DataHelper<User> DHUser = new DataHelper<User>(conn);
         public static ClaimsPrincipal UserLogin(HttpContext context, string username, string password) {
             string passhash = MD5Hash(password);
             User user = DHUser.SelectOne(String.Format("username = '{0}' AND password = '{1}'", 

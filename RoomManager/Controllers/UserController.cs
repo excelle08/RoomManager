@@ -16,7 +16,7 @@ namespace RoomManager.Controllers
     public class UserController : Controller
     {
         static SqlConnection conn = DBConnector.GetConnection();
-        static DataHelper<User> DHUser = new DataHelper<User>(ref conn);
+        static DataHelper<User> DHUser = new DataHelper<User>(conn);
         // GET /api/user (Get current user)
         [HttpGet]
         public IActionResult Get()

@@ -280,7 +280,7 @@
                                                         <td v-text="getDate(c.entry_Date)"></td>
                                                         <td v-text="getDate(c.checkout_Date)"></td>
                                                         <td v-text="getStatus(c.status)"></td>
-                                                        <td v-text="getStatus(c.room)"></td>
+                                                        <td v-text="getStatus(c.room_Id)"></td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -449,7 +449,7 @@
                                                                     </thead>
                                                                     <tbody>
                                                                     <tr v-for="g in groups">
-                                                                        <td scope="row" v-text="c.id"></td>
+                                                                        <td scope="row" v-text="g.id"></td>
                                                                         <td v-text="g.name"></td>
                                                                         <td v-text="g.identity"></td>
                                                                         <td v-text="getDate(g.reserve_Date)"></td>
@@ -519,7 +519,7 @@
                                                                                 <td v-text="c.name"></td>
                                                                                 <td v-text="c.identity"></td>
                                                                                 <td v-text="getGender(c.gender)"></td>
-                                                                                <td v-text="toDateTime(c.entrydate)"></td>
+                                                                                <td v-text="getDate(c.entry_Date)"></td>
                                                                             </tr>
                                                                             </tbody>
                                                                         </table>

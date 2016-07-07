@@ -110,8 +110,8 @@ function roomlistView(room, count) {
                         alert('入住操作错误: ' + err.message);
                     } else {
                         for(var i in customers) {
-                            if (customer[i].id == r.id) {
-                                customer[i] = r;
+                            if (customers[i].id == r.id) {
+                                customers[i] = r;
                             }
                         }
                         alert('入住成功');
@@ -217,6 +217,10 @@ function roomlistView(room, count) {
                 });
             },
 
+            getGender: function (val) {
+                return (val == 1 || val == true) ? '男' : '女';
+            },
+
             next: function () {
                 var page = this.page;
                 var rooms = this.rooms;
@@ -318,6 +322,10 @@ function customerView(customers) {
                 return toDateTime(ts);
             },
 
+            getGender: function (val) {
+                return (val == true || val == 1) ? '男' : '女';
+            },
+
             getStatus: function(state) {
                 switch (state) {
                     case 0:
@@ -349,6 +357,16 @@ $(document).ready(function () {
         if (err) {
             alert('获取团体列表出错 - ' + err.message);
         } else {
+            for(var i in r) {
+                r[i]['name'] = '';
+                r[i]['identity'] = '';
+                getApi('/api/customer/' + r[i].leader_Id, function (err2, r2) {
+                    if (r2) {
+                        r[i].name = r2.name;
+                        r[i].identity = r2.identity;
+                    }
+                });
+            }
             groupView(r);
         }
     })
@@ -376,7 +394,15 @@ function groupView(groups) {
                     } else {
                         groups.splice(0, groups.length);
                         for(var i in r) {
-                            groups.push(r[i]);
+                            r[i]['name'] = '';
+                            r[i]['identity'] = '';
+                            getApi('/api/customer/' + r[i].leader_Id, function (err2, r2) {
+                                if (r2) {
+                                    r[i].name = r2.name;
+                                    r[i].identity = r2.identity;
+                                    groups.push(r[i]);
+                                }
+                            });
                         }
                     }
                 });
@@ -418,6 +444,10 @@ function groupView(groups) {
                 return toDateTime(ts);
             },
 
+            getGender: function(val) {
+                return (val == 1 || val == true) ? '男' : '女';
+            },
+
             getStatus: function(state) {
                 switch (state) {
                     case 0:
@@ -443,11 +473,19 @@ function groupView(groups) {
             },
             
             checkout: function (group) {
-                
+                location.assign('/group_checkout.html?group=' + group.id);
             },
             
             checkin: function (group) {
-                location.assign('/group_checkin.html?group=' + group.id);
+                var _this = this;
+                postApi('/api/group', group, function (err, r) {
+                    if (err) {
+                        alert('Failed to check in the group: ' + err.message);
+                    } else {
+                        alert('入住处理成功');
+                        _this.update();
+                    }
+                });
             },
             
             groupDetail: function (group) {

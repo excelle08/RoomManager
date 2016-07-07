@@ -10,7 +10,7 @@ namespace RoomManager.Controllers
     public class RoomTypeController : Controller
     {
         static SqlConnection conn = DBConnector.GetConnection();
-        static DataHelper<RoomType> dhRt = new DataHelper<RoomType>(ref conn);
+        static DataHelper<RoomType> dhRt = new DataHelper<RoomType>(conn);
 
         [HttpGetAttribute]
         public IActionResult GetAll() {

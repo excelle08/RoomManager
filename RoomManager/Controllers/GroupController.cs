@@ -10,7 +10,7 @@ namespace RoomManager.Controllers
     public class GroupController : Controller
     {
         static SqlConnection conn = DBConnector.GetConnection();
-        static DataHelper<Group> dhGroup = new DataHelper<Group>(ref conn);
+        static DataHelper<Group> dhGroup = new DataHelper<Group>(conn);
         
         [HttpGetAttribute("{id}")]
         public IActionResult Get(string id) {
@@ -25,14 +25,14 @@ namespace RoomManager.Controllers
             }
 
             if (keyword != "") {
-                DataHelper<Customer> dhCustomer = new DataHelper<Customer>(ref conn);
+                DataHelper<Customer> dhCustomer = new DataHelper<Customer>(conn);
                 IEnumerable<Customer> leaders = 
                     dhCustomer.Select(String.Format("name LIKE '%{0}%' OR identity LIKE '%{0}%' AND status != 2", keyword));
 
                 List<Group> groups = new List<Group>();
                 
                 foreach (Customer c in leaders) {
-                    IEnumerable<Group> gs = dhGroup.Select(String.Format("leader = {0}", c.Id), offset, limit);
+                    IEnumerable<Group> gs = dhGroup.Select(String.Format("leader_id = {0}", c.Id), offset, limit);
                     foreach (Group g in gs) {
                         groups.Add(g);
                     }
@@ -55,8 +55,8 @@ namespace RoomManager.Controllers
             grp.Entry_Date = Common.CurrentTimestamp();
             grp.Status = CustomerStatus.CheckedIn;
             string[] ids = grp.Members.Split(',');
-            DataHelper<Customer> dhCustomer = new DataHelper<Customer>(ref conn);
-            DataHelper<Room> dhRoom = new DataHelper<Room>(ref conn);
+            DataHelper<Customer> dhCustomer = new DataHelper<Customer>(conn);
+            DataHelper<Room> dhRoom = new DataHelper<Room>(conn);
 
             foreach(string id in ids) {
                 Customer c = dhCustomer.SelectOne(String.Format("id={0}", id));
@@ -73,7 +73,7 @@ namespace RoomManager.Controllers
             return new ObjectResult(grp);
         }
 
-        [HttpDeleteAttribute("id")]
+        [HttpDeleteAttribute("{id}")]
         public IActionResult CheckoutGroup(string id) {
             Group grp = dhGroup.SelectOne(String.Format("id={0}", id));
             grp.Checkout_Date = Common.CurrentTimestamp();
@@ -81,10 +81,10 @@ namespace RoomManager.Controllers
 
             string[] ids = grp.Members.Split(',');
             int days = (int)Math.Ceiling((grp.Checkout_Date - grp.Entry_Date) / 86400);
-            DataHelper<Room> dhRoom = new DataHelper<Room>(ref conn);
-            DataHelper<RoomType> dhrt = new DataHelper<RoomType>(ref conn);
-            DataHelper<Consumption> dhCons = new DataHelper<Consumption>(ref conn);
-            DataHelper<Customer> dhCus = new DataHelper<Customer>(ref conn);
+            DataHelper<Room> dhRoom = new DataHelper<Room>(conn);
+            DataHelper<RoomType> dhrt = new DataHelper<RoomType>(conn);
+            DataHelper<Consumption> dhCons = new DataHelper<Consumption>(conn);
+            DataHelper<Customer> dhCus = new DataHelper<Customer>(conn);
             
             List<Consumption> cons = new List<Consumption>();
             foreach(string i in ids) {
@@ -104,12 +104,21 @@ namespace RoomManager.Controllers
                 cos.Comment = String.Format("Room {0} (Type: {1}) for {2} day(s)", r.Name, rt.Name, days);
                 cos.Count = 1;
                 cos.Customer = c.Id;
-                cos.Paid = true;
+                cos.Paid = false;
                 cos.Price = price * days;
 
                 cons.Add(cos);
                 dhCons.Insert(cos);
+
+                r.Status = RoomStatus.Vacant;
+                dhRoom.Update(r);
+
+                c.Status = CustomerStatus.CheckedOut;
+                c.Checkout_Date = Common.CurrentTimestamp();
+                dhCus.Update(c);
             }
+
+            dhGroup.Update(grp);
 
             return new ObjectResult(cons);
         }

@@ -10,12 +10,12 @@ namespace RoomManager.Controllers
     public class ConsumptionController : Controller
     {
         static SqlConnector conn = DBConnector.GetConnection();
-        static DataHelper<Consumption> dhCons = new DataHelper<Consumption>(ref conn);
+        static DataHelper<Consumption> dhCons = new DataHelper<Consumption>(conn);
 
         [HttpGetAttribute("{customerId}")]
         public IActionResult GetUnpaidOrders(string customerId) {
             List<Object> lst = new List<Object>();
-            DataHelper<Item> dhItem = new DataHelper<Item>(ref conn);
+            DataHelper<Item> dhItem = new DataHelper<Item>(conn);
             IEnumerable<Consumption> cs = dhCons.Select(String.Format("customer = {0} AND paid = false", customerId));
             foreach(Consumption c in cs) {
                 Item item = dhItem.SelectOne(String.Format("id = {0}", c.Item));
@@ -34,7 +34,7 @@ namespace RoomManager.Controllers
         [HttpPutAttribute]
         public IActionResult AddOrder([FromBodyAttribute] Consumption consumption) {
             consumption.Paid = false;
-            DataHelper<Item> dhItem = new DataHelper<Item>(ref conn);
+            DataHelper<Item> dhItem = new DataHelper<Item>(conn);
             Item item = dhItem.SelectOne(String.Format("item = {0}", consumption.Item));
             if (item == null) {
                 return NotFound(new {error = "Order", message = "Requested item does not exist."});

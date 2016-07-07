@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>团体预订</title>
+    <title>团体退房结账</title>
     <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="http://apps.bdimg.com/libs/vue/1.0.14/vue.js"></script>
     <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
@@ -14,7 +14,7 @@
     <script src="/js/request.js"></script>
     <script src="/js/trumbowyg.min.js"></script>
     <script src="/js/auth.js"></script>
-    <script src="/js/groupbook.js"></script>
+    <script src="/js/group_checkout.js"></script>
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -41,6 +41,7 @@
     </div>
 </nav>
 
+
 <div class="container-fluid">
     <div class="row" >
         <div class="col-sm-2 col-md-2">
@@ -49,10 +50,29 @@
         <div class="col-sm-10 col-md-10 main" id="checkout-form">
             <div class="alert alert-danger hidden" role="alert" id="product-category-warning"> </div>
             <form class="form-horizontal" id="login-form">
+                <div class="form-group">
+                    <label class="col-sm-2 col-md-1">团体领队:</label>
+                    <div class="col-sm-6">
+                        <input class="form-control" type="text" v-model="leader.name" readonly>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 col-md-1">身份证号码:</label>
+                    <div class="col-sm-6">
+                        <input class="form-control" type="text" v-model="leader.identity" readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 col-md-1">总价格:</label>
+                    <div class="col-sm-6">
+                        <input class="form-control" type="text" v-bind:value="getSum()" readonly>
+                    </div>
+                </div>
 
                 <div class="form-group">
                     <table class="table">
-                        <caption>成员列表(第一个登记的将记为领队)</caption>
+                        <caption>消费记录</caption>
                         <thead>
                         <tr>
                             <th>#ID</th>
@@ -65,7 +85,7 @@
                         <tbody>
                         <tr v-for="c in consumptions">
                             <td v-text="c.id"></td>
-                            <td v-text="c.itemname"></td>
+                            <td v-text="c.itemname"></td>{
                             <td v-text="c.count"></td>
                             <td v-text="c.price"></td>
                             <td v-text="c.comment"></td>
@@ -83,6 +103,5 @@
         </div>
     </div>
 </div>
-
 </body>
 </html>

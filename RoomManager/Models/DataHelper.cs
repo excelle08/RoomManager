@@ -10,10 +10,10 @@ namespace RoomManager.Model
 {
     public class DataHelper<T> : IDataHelper<T>
     {
-        private SqlConnection connector;
+        // private SqlConnection connector;
         private string tablename;
-        public DataHelper(ref SqlConnection conn) {
-            connector = conn;
+        public DataHelper(SqlConnection conn) {
+            // connector = conn;
             
             var attr = typeof(T).GetTypeInfo().GetCustomAttribute<TableAttribute>();
             if (attr == null) {
@@ -31,33 +31,39 @@ namespace RoomManager.Model
             values = String.Join(", ", GetValues(item, false, true));
             string sql = String.Format("INSERT INTO {0} ({1}) VALUES ({2});", tablename, fields, values);
 
-            SqlCommand cmd = new SqlCommand();
-            cmd.Connection = connector;
-            cmd.Connection.Open();
-            cmd.CommandText = sql;
+            using(SqlConnection connector = DBConnector.GetConnection())
+            {
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = connector;
+                cmd.Connection.Open();
+                cmd.CommandText = sql;
 
-            cmd.ExecuteNonQuery();
-            SetLastInsertId(ref item, (int)cmd.LastInsertedId);
+                cmd.ExecuteNonQuery();
+                SetLastInsertId(ref item, (int)cmd.LastInsertedId);
 
-            cmd.Connection.Close();
-
-            return item;
+                cmd.Connection.Close();
+                return item;    
+            }
         }
 
         public IEnumerable<T> SelectAll(string condition) {
             string sql = String.Format("SELECT * FROM {0};", tablename);
             IEnumerable<T> result;
-            connector.Open();
-            try {
-                result = connector.Query<T>(sql);
-            } catch (InvalidOperationException e) {
-                Debug.Write(e.Message);
-                result = new List<T>();
-            } finally {
-                connector.Close();
+            using(SqlConnection connector = DBConnector.GetConnection())
+            {
+                connector.Open();
+                try {
+                    result = connector.Query<T>(sql);
+                } catch (InvalidOperationException e) {
+                    Debug.Write(e.Message);
+                    result = new List<T>();
+                } finally {
+                    connector.Close();
+                }
+
+                return result;
             }
 
-            return result;
         }
 
         public IEnumerable<T> Select(string condition, int offset = 0, int limit = 0) {
@@ -70,17 +76,21 @@ namespace RoomManager.Model
                 sql += String.Format(" LIMIT {0},{1} ", offset, limit);
             }
 
-            connector.Open();
-            try {
-                result = connector.Query<T>(sql);
-            } catch (InvalidOperationException e ) {
-                Debug.Write(e.Message);
-                result = new List<T>();
-            } finally {
-                connector.Close();
+            using(SqlConnection connector = DBConnector.GetConnection())
+            {
+                connector.Open();
+                try {
+                    result = connector.Query<T>(sql);
+                } catch (InvalidOperationException e ) {
+                    Debug.Write(e.Message);
+                    result = new List<T>();
+                } finally {
+                    connector.Close();
+                }
+
+                return result;
             }
 
-            return result;
         }
 
         public T SelectOne(string condition) {
@@ -90,17 +100,20 @@ namespace RoomManager.Model
                 sql += " WHERE " + condition;
             }
 
-            connector.Open();
-            try {
-                result = connector.QueryFirst<T>(sql);
-            } catch ( InvalidOperationException e ) {
-                Debug.Write(e.Message);
-                result = default(T);
-            } finally {
-                connector.Close();
-            }
+            using(SqlConnection connector = DBConnector.GetConnection())
+            {    
+                connector.Open();
+                try {
+                    result = connector.QueryFirst<T>(sql);
+                } catch ( InvalidOperationException e ) {
+                    Debug.Write(e.Message);
+                    result = default(T);
+                } finally {
+                    connector.Close();
+                }
 
-            return result;
+                return result;
+            }
         }
 
         public int Count(string condition = "") {
@@ -110,11 +123,15 @@ namespace RoomManager.Model
             }
             int count;
 
-            connector.Open();
-            count = connector.QueryFirst<int>(sql);
-            connector.Close();
+            using(SqlConnection connector = DBConnector.GetConnection())
+            {
+                connector.Open();
+                count = connector.QueryFirst<int>(sql);
+                connector.Close();
 
-            return count;
+                return count;
+            }
+
         }
 
         public int Update(T item) {
@@ -133,11 +150,14 @@ namespace RoomManager.Model
             string sql = String.Format("UPDATE {0} SET {1} WHERE {2}={3} ", 
                 tablename, String.Join(", ", setvalues.ToArray()), pk, pkvalue);
 
-            connector.Open();
-            int retn = connector.Execute(sql);
-            connector.Close();
+            using(SqlConnection connector = DBConnector.GetConnection())
+            {
+                connector.Open();
+                int retn = connector.Execute(sql);
+                connector.Close();
 
-            return retn;
+                return retn;
+            }
         }
 
         public int Delete(T item) {
@@ -149,11 +169,15 @@ namespace RoomManager.Model
             }
 
             string sql = String.Format("DELETE FROM {0} WHERE {1}={2}", tablename, pk, pkvalue);
-            connector.Open();
-            int retn = connector.Execute(sql);
-            connector.Close();
 
-            return retn;
+            using(SqlConnection connector = DBConnector.GetConnection())
+            {
+                connector.Open();
+                int retn = connector.Execute(sql);
+                connector.Close();
+
+                return retn;
+            }
         }
         
         private string[] GetPrimaryKey() {

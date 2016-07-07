@@ -10,7 +10,7 @@ namespace RoomManager.Controllers
     public class CustomerController : Controller
     {
         static SqlConnection conn = DBConnector.GetConnection();
-        static DataHelper<Customer> dhCustomer = new DataHelper<Customer>(ref conn);
+        static DataHelper<Customer> dhCustomer = new DataHelper<Customer>(conn);
         [HttpGetAttribute]
         public IActionResult list(string keyword = "", int page = 0, int limit = 0) {
             int offset = 0;

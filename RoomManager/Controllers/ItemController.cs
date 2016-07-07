@@ -9,7 +9,7 @@ namespace RoomManager.Controllers
     public class ItemController : Controller
     {
         static SqlConnection conn = DBConnector.GetConnection();
-        static DataHelper<Item> dhItem = new DataHelper<Item>(ref conn);
+        static DataHelper<Item> dhItem = new DataHelper<Item>(conn);
 
         [HttpGetAttribute]
         public IActionResult Search(string keyword = "", int page = 0, int limit = 0) {

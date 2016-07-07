@@ -60,8 +60,8 @@ function checkoutView(customer, room, consumptions) {
                     if (err) {
                         alert('提交时发生错误: ' + err.message);
                     } else {
-                        alert('结算成功!')
-                        history.back();
+                        alert('结算成功!');
+                        location.assign('/');
                     }
                 });
             }

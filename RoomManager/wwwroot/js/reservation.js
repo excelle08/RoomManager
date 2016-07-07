@@ -71,7 +71,7 @@ function reservationView(room) {
                         } else {
                             alert('预订成功!');
                         }
-                        history.back();
+                        location.assign('/');
                     });
             }
         }
