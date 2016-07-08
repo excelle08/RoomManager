@@ -96,7 +96,7 @@ function groupbookView() {
                 }
                 var data = {
                     leader_Id: parseInt(members[0].id),
-                    members: member_ids.join(',ls' +
+                    members: member_ids.join(',' +
                         ''),
                     status: 0
                 };

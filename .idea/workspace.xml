@@ -2,25 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="60824fd5-135e-42f9-bc9b-309976699ab0" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/RoomManager/wwwroot/js/group_checkout.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RoomManager/Controllers/ConsumptionController.cs" afterPath="$PROJECT_DIR$/RoomManager/Controllers/ConsumptionController.cs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RoomManager/Controllers/CustomerController.cs" afterPath="$PROJECT_DIR$/RoomManager/Controllers/CustomerController.cs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RoomManager/Controllers/GroupController.cs" afterPath="$PROJECT_DIR$/RoomManager/Controllers/GroupController.cs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RoomManager/Controllers/ItemController.cs" afterPath="$PROJECT_DIR$/RoomManager/Controllers/ItemController.cs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RoomManager/Controllers/RoomController.cs" afterPath="$PROJECT_DIR$/RoomManager/Controllers/RoomController.cs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RoomManager/Controllers/RoomTypeController.cs" afterPath="$PROJECT_DIR$/RoomManager/Controllers/RoomTypeController.cs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RoomManager/Controllers/UserController.cs" afterPath="$PROJECT_DIR$/RoomManager/Controllers/UserController.cs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RoomManager/Models/DataHelper.cs" afterPath="$PROJECT_DIR$/RoomManager/Models/DataHelper.cs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RoomManager/Models/Database.cs" afterPath="$PROJECT_DIR$/RoomManager/Models/Database.cs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RoomManager/Models/UserHelper.cs" afterPath="$PROJECT_DIR$/RoomManager/Models/UserHelper.cs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RoomManager/wwwroot/group_checkout.html" afterPath="$PROJECT_DIR$/RoomManager/wwwroot/group_checkout.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RoomManager/wwwroot/index.html" afterPath="$PROJECT_DIR$/RoomManager/wwwroot/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RoomManager/wwwroot/js/checkout.js" afterPath="$PROJECT_DIR$/RoomManager/wwwroot/js/checkout.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RoomManager/wwwroot/js/groupbook.js" afterPath="$PROJECT_DIR$/RoomManager/wwwroot/js/groupbook.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RoomManager/wwwroot/js/reservation.js" afterPath="$PROJECT_DIR$/RoomManager/wwwroot/js/reservation.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RoomManager/wwwroot/js/roommanager.js" afterPath="$PROJECT_DIR$/RoomManager/wwwroot/js/roommanager.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db/data.sql" afterPath="$PROJECT_DIR$/db/data.sql" />
     </list>
     <ignored path="RoomManager.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -117,8 +99,8 @@
       <file leaf-file-name="groupbook.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/RoomManager/wwwroot/js/groupbook.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1275">
-              <caret line="91" column="17" selection-start-line="91" selection-start-column="17" selection-end-line="91" selection-end-column="17" />
+            <state relative-caret-position="600">
+              <caret line="87" column="43" selection-start-line="87" selection-start-column="43" selection-end-line="87" selection-end-column="43" />
               <folding>
                 <element signature="e#0#40#0" expanded="false" />
                 <element signature="e#1170#1230#0" expanded="false" />
@@ -320,6 +302,10 @@
               <option name="myItemId" value="RoomManager" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="db" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -328,10 +314,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="RoomManager" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="db" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -413,12 +395,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1467798189464</updated>
-      <workItem from="1467798192231" duration="64354000" />
+      <workItem from="1467798192231" duration="65067000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="64354000" />
+    <option name="totallyTimeSpent" value="65067000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1254" y="-1080" width="1920" height="1080" extended-state="0" />
@@ -647,8 +629,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/RoomManager/wwwroot/js/groupbook.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1275">
-          <caret line="91" column="17" selection-start-line="91" selection-start-column="17" selection-end-line="91" selection-end-column="17" />
+        <state relative-caret-position="600">
+          <caret line="87" column="43" selection-start-line="87" selection-start-column="43" selection-end-line="87" selection-end-column="43" />
           <folding>
             <element signature="e#0#40#0" expanded="false" />
             <element signature="e#1170#1230#0" expanded="false" />

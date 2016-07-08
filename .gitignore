@@ -1,0 +1,6 @@
+*.dll
+*.pdb
+.idea
+.DS_Store
+.vscode
+
